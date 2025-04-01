@@ -6,7 +6,7 @@ spec:
   crd:
     spec:
       names:
-        kind: K8sAzureV3NoPrivilegeEscalation
+        kind: K8sAzureNoCrowdStrikeFalconAgents
       validation:
         # Schema for the `parameters` field
         openAPIV3Schema:
@@ -56,3 +56,34 @@ spec:
           d.metadata.namespace == ns
           d.metadata.name == ds
         }
+
+        input_containers[c] {
+          c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+          c := input.review.object.spec.initContainers[_]
+        }
+        input_containers[c] {
+          c := input.review.object.spec.ephemeralContainers[_]
+        }
+        input_container_excluded(field) {
+          field == input.parameters.excludedContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }
