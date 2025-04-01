@@ -35,6 +35,8 @@ spec:
       rego: |
         package k8srequirecrowdstrikefalcon
 
+        import data.lib.exclude_container_image.is_excluded
+
         violation[{"msg": msg, "details": {}}] {
           required_ns := input.parameters.requiredNamespace
           required_ds := input.parameters.requiredDaemonSet
