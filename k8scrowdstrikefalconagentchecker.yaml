@@ -29,9 +29,6 @@ spec:
           # Tracing instead of print statements
           trace(sprintf("Required Namespace: %v", [required_ns]))
           trace(sprintf("Required DaemonSet: %v", [required_ds]))
-          
-          # Additional trace to see what containers are being evaluated
-          trace(sprintf("Evaluating container: %v with image: %v", [c.name, c.image]))
 
           # Check if the required DaemonSet exists
           trace(sprintf("Checking if DaemonSet %v exists in namespace %v", [required_ds, required_ns]))
