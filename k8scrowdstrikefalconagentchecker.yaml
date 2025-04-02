@@ -8,6 +8,7 @@ spec:
       names:
         kind: K8sAzureNoCrowdStrikeFalconAgents
       validation:
+        # Schema for the `parameters` field
         openAPIV3Schema:
           properties:
             excludedContainers:
@@ -32,87 +33,8 @@ spec:
   targets:
     - target: admission.k8s.gatekeeper.sh
       rego: |
-        package k8srequirecrowdstrikefalcon
-        
-        import data.lib.exclude_container_image.is_excluded
-        import future.keywords.in
-        
-        violation[{"msg": msg, "details": details}] {
-          required_ns := input.parameters.requiredNamespace
-          required_ds := input.parameters.requiredDaemonSet
-          
-          # Tracing instead of print statements
-          trace(sprintf("Required Namespace: %v", [required_ns]))
-          trace(sprintf("Required DaemonSet: %v", [required_ds]))
-          
-          # Exclusions
-          c := input_containers[_]
-          not input_container_excluded(c.name)
-          not is_excluded(c)
-          
-          # Additional trace to see what containers are being evaluated
-          trace(sprintf("Evaluating container: %v with image: %v", [c.name, c.image]))
-          
-          # Check if the required DaemonSet exists
-          trace(sprintf("Checking if DaemonSet %v exists in namespace %v", [required_ds, required_ns]))
-          not daemonset_exists(required_ns, required_ds)
-          
-          # Include more details in the violation for debugging
-          details := {
-            "namespace": required_ns,
-            "daemonset": required_ds,
-            "container_name": c.name,
-            "container_image": c.image
-          }
-          
-          msg := sprintf("CrowdStrike Falcon DaemonSet '%s' is required in namespace '%s' but is missing", [required_ds, required_ns])
+        package k8sdenyall
+
+        violation[{"msg": msg}] {
+          msg := sprintf("REVIEW OBJECT: %v", [input.review])
         }
-        
-        daemonset_exists(ns, ds) {
-          some i
-          d := input.review.object.items[i]
-          d.kind == "DaemonSet"
-          d.metadata.namespace == ns
-          d.metadata.name == ds
-          
-          trace(sprintf("Found DaemonSet %v in namespace %v", [ds, ns]))
-        }
-        
-        input_containers[c] {
-          c := input.review.object.spec.containers[_]
-        }
-        input_containers[c] {
-          c := input.review.object.spec.initContainers[_]
-        }
-        input_containers[c] {
-          c := input.review.object.spec.ephemeralContainers[_]
-        }
-        input_container_excluded(field) {
-          field == input.parameters.excludedContainers[_]
-          trace(sprintf("Container %v is excluded", [field]))
-        }
-      libs:
-        - |
-          package lib.exclude_container_image
-          import future.keywords.in
-          
-          is_excluded(container) {
-              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
-              img := container.image
-              exclusion := exclude_images[_]
-              trace(sprintf("Checking if image %v matches exclusion %v", [img, exclusion]))
-              _matches_exclusion(img, exclusion)
-          }
-          
-          _matches_exclusion(img, exclusion) {
-              not endswith(exclusion, "*")
-              exclusion == img
-              trace(sprintf("Image %v exactly matches exclusion %v", [img, exclusion]))
-          }
-          
-          _matches_exclusion(img, exclusion) {
-              endswith(exclusion, "*")
-              prefix := trim_suffix(exclusion, "*")
-              startswith(img, prefix)
-              trace(sprintf("Image %v matches prefix exclusion %v", [img, prefix]))
-          }
