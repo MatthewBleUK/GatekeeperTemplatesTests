@@ -14,21 +14,24 @@ spec:
             requiredNamespace:
               type: string
               description: "Namespace where CrowdStrike Falcon DaemonSet should be running"
-            requiredDaemonSet:
-              type: string
-              description: "Name of the CrowdStrike Falcon DaemonSet"
   targets:
     - target: admission.k8s.gatekeeper.sh
       rego: |
-        package k8srequirecrowdstrikefalcon
+        package k8sazurenocrowdstrikefalconagents
 
         violation[{"msg": msg, "details": {}}] {
           required_ns := input.parameters.requiredNamespace
           
+          # Debug - print ns params
+          print(sprintf("Checking if the required namespace '%s' exists", [required_ns]))
+
           # Check if the namespace exists
           not namespace_exists(required_ns)
           
           msg := sprintf("Required namespace '%s' does not exist in the cluster", [required_ns])
+          
+          # Debug - print violation
+          print(sprintf("Violation: %s", [msg]))
         }
 
         namespace_exists(ns) {
