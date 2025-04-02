@@ -41,6 +41,10 @@ spec:
           required_ns := input.parameters.requiredNamespace
           required_ds := input.parameters.requiredDaemonSet
 
+          # Debugging
+          print("Required Namespace: ", required_ns)
+          print("Required Daemonset: ", required_ds)
+
           # Exclusions
           c := input_containers[_]
           not input_container_excluded(c.name)
