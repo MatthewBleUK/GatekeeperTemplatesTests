@@ -24,22 +24,13 @@ spec:
 
         violation[{"msg": msg, "details": {}}] {
           required_ns := input.parameters.requiredNamespace
-          required_ds := input.parameters.requiredDaemonSet
-
-          # Tracing instead of print statements
-          trace(sprintf("Required Namespace: %v", [required_ns]))
-          trace(sprintf("Required DaemonSet: %v", [required_ds]))
-
-          # Check if the required DaemonSet exists
-          trace(sprintf("Checking if DaemonSet %v exists in namespace %v", [required_ds, required_ns]))
-          not daemonset_exists(required_ns, required_ds)
-          msg := sprintf("CrowdStrike Falcon DaemonSet '%s' is required in namespace '%s' but is missing", [required_ds, required_ns])
+          
+          # Check if the namespace exists
+          not namespace_exists(required_ns)
+          
+          msg := sprintf("Required namespace '%s' does not exist in the cluster", [required_ns])
         }
 
-        daemonset_exists(ns, ds) {
-          some i
-          d := input.review.object.items[i]
-          d.kind == "DaemonSet"
-          d.metadata.namespace == ns
-          d.metadata.name == ds
+        namespace_exists(ns) {
+          [_, namespace] := data.inventory.cluster["v1"]["Namespace"][ns]
         }
