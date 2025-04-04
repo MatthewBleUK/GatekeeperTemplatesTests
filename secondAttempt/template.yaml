@@ -12,15 +12,20 @@ spec:
       rego: |
         package requirefalconnamespace
 
-         # Get all namespace names and check for falcon-system
-        namespace_names = [name | 
-            # Access the namespaces from data.inventory.cluster.v1.Namespace
-            namespace = data.inventory.cluster.v1.Namespace
-            name = namespace[_].metadata.name
-            name == "falcon-system"
-        ]
-
+        # Namespace does not exist 
         violation[{"msg": msg}] {
-          count(namespace_names) == 0
-          msg := sprintf("CrowdStrike Falcon agent does not exist: %v", [namespace_names])
+          not data.inventory.namespace["falcon-system"]
+          msg := "CrowdStrike's Namespace does not exist"
         }
+
+        # Daemonset does not exist
+        violation[{"msg": msg}] {
+          not data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]
+          msg := "CrowdStrike's agent does not exist"
+        }
+
+        # # Daemonset is not fully ready
+        # violation[{"msg": msg}] {
+        #   data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["desiredNumberScheduled"] 
+        #   msg := "CrowdStrike's daemonset is not in a fully ready state"
+        # }
