@@ -12,23 +12,15 @@ spec:
       rego: |
         package requirefalconnamespace
 
+         # Get all namespace names 
+        namespace_names = [name | 
+            # Access the namespaces from data.inventory.cluster.v1.Namespace
+            namespace = data.inventory.cluster.v1.Namespace
+            name = namespace[_].metadata.name
+            name == "falcon-system"
+        ]
+
         violation[{"msg": msg}] {
-          # Get all namespaces
-          namespaces := [namespace | input.review.object.kind == "Namespace"; namespace := input.review.object.metadata.name]
-          
-          # Also check stored namespaces to ensure Falcon namespace exists
-          existing_namespaces := [data.inventory.cluster.v1.Namespace[ns].metadata.name | ns]
-          
-          # Combine all known namespaces
-          all_namespaces := array.concat(namespaces, existing_namespaces)
-          
-          # Check if any namespace contains "falcon-system"
-          not any_falcon_namespace(all_namespaces)
-          
-          msg := "Violation: 'falcon-system' does not exist"
-        }
-        
-        any_falcon_namespace(namespaces) {
-          namespace := namespaces[_]
-          contains(lower(namespace), "falcon-system")
+          count(namespace_names) == 0
+          msg := sprintf("CrowdStrike Falcon agent does not exist: %v", [namespace_names])
         }
