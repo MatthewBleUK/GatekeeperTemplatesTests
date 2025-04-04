@@ -24,8 +24,8 @@ spec:
           msg := "CrowdStrike's agent does not exist"
         }
 
-        # # Daemonset is not fully ready
-        # violation[{"msg": msg}] {
-        #   data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["desiredNumberScheduled"] 
-        #   msg := "CrowdStrike's daemonset is not in a fully ready state"
-        # }
+        # Check Daemonset state
+        violation[{"msg": msg}] {
+          data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["metadata"]["spec"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["metadata"]["spec"]["status"]["desiredNumberScheduled"]
+          msg := "CrowdStrike's Daemonset is not in a fully ready state"
+        }
