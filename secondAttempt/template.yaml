@@ -12,7 +12,7 @@ spec:
       rego: |
         package requirefalconnamespace
 
-         # Get all namespace names 
+         # Get all namespace names and check for falcon-system
         namespace_names = [name | 
             # Access the namespaces from data.inventory.cluster.v1.Namespace
             namespace = data.inventory.cluster.v1.Namespace
