@@ -1,39 +1,31 @@
-apiVersion: templates.gatekeeper.sh/v1beta1
+apiVersion: templates.gatekeeper.sh/v1
 kind: ConstraintTemplate
 metadata:
-  name: k8sazurenocrowdstrikefalconagents
+  name: checkcrowdstrikeagent
 spec:
   crd:
     spec:
       names:
-        kind: K8sAzureNoCrowdStrikeFalconAgents
-      validation:
-        # Schema for the `parameters` field
-        openAPIV3Schema:
-          properties:
-            requiredNamespace:
-              type: string
-              description: "Namespace where CrowdStrike Falcon DaemonSet should be running"
+        kind: CheckCrowdStrikeAgent
   targets:
     - target: admission.k8s.gatekeeper.sh
       rego: |
-        package k8sazurenocrowdstrikefalconagents
+        package checkcrowdstrikeagent
 
-        violation[{"msg": msg, "details": {}}] {
-          required_ns := input.parameters.requiredNamespace
-          
-          # Debug - print ns params
-          print(sprintf("Checking if the required namespace '%s' exists", [required_ns]))
-
-          # Check if the namespace exists
-          not namespace_exists(required_ns)
-          
-          msg := sprintf("Required namespace '%s' does not exist in the cluster", [required_ns])
-          
-          # Debug - print violation
-          print(sprintf("Violation: %s", [msg]))
+        # Namespace does not exist 
+        violation[{"msg": msg}] {
+          not data.inventory.cluster.v1.Namespace["falcon-system"]
+          msg := "CrowdStrike's Namespace does not exist"
         }
 
-        namespace_exists(ns) {
-          [_, namespace] := data.inventory.cluster["v1"]["Namespace"][ns]
+        # Daemonset does not exist
+        violation[{"msg": msg}] {
+          not data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]
+          msg := "CrowdStrike's Daemonset does not exist"
+        }
+
+        # Check Daemonset state
+        violation[{"msg": msg}] {
+          data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["metadata"]["spec"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["metadata"]["spec"]["status"]["desiredNumberScheduled"]
+          msg := "CrowdStrike's Daemonset is not in a fully ready state"
         }
