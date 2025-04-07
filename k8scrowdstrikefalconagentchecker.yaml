@@ -16,13 +16,16 @@ spec:
         violation[{"msg": msg}] {
           input.kind == "Namespace"
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          msg := "CrowdStrike's Namespace does not exist"
+
+          ns_data := data.inventory.cluster["v1"]["Namespace"]
+          msg := sprintf("CrowdStrike's Namespace does not exist [%s]", [namespaces])
         }
 
         # Daemonset does not exist
         violation[{"msg": msg}] {
           input.kind == "Namespace"
           not data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]
+          
           msg := "CrowdStrike's Daemonset does not exist"
         }
 
