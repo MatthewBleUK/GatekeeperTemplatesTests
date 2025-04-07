@@ -18,7 +18,7 @@ spec:
           not data.inventory.cluster.v1.Namespace["falcon-system"]
 
           ns_data := data.inventory.cluster["v1"]["Namespace"]
-          msg := sprintf("CrowdStrike's Namespace does not exist [%s]", [namespaces])
+          msg := sprintf("CrowdStrike's Namespace does not exist [%s]", [ns_data])
         }
 
         # Daemonset does not exist
