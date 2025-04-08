@@ -11,13 +11,11 @@ spec:
     - target: admission.k8s.gatekeeper.sh
       rego: |
         package checkcrowdstrikeagent
-
-        data_obj_msg := data.inventory
         
         # Namespace does not exist 
         violation[{"msg": msg}] { 
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          msg := "CrowdStrike's Namespace does not exist - '%s", [data_obj_msg])
+          msg := sprintf("CrowdStrike's Namespace does not exist, inventory: %v", [data.inventory])
         }
 
         # Daemonset does not exist
