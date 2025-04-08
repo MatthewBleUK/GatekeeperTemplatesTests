@@ -13,10 +13,11 @@ spec:
         package checkcrowdstrikeagent
 
         # Namespace does not exist 
-         violation[{"msg": msg}] {
-           not data.inventory.cluster.v1.Namespace["falcon-system"]
-           msg := "CrowdStrike's Namespace does not exist"
-         }
+        violation[{"msg": msg}] {
+          not data.inventory.cluster.v1.Namespace["falcon-system"]
+          nsdata := data.inventory.cluster["v1"]["Namespace"]
+          msg := sprintf("CrowdStrike's Namespace does not exist [%s]", [nsdata])
+        }
 
         # Daemonset does not exist
         violation[{"msg": msg}] {
