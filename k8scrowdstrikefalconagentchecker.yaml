@@ -15,7 +15,8 @@ spec:
         # Namespace does not exist 
         violation[{"msg": msg}] { 
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          msg := sprintf("CrowdStrike's Namespace does not exist, inventory: %v", [data.inventory])
+          # msg := sprintf("CrowdStrike's Namespace does not exist, inventory: %v", [data.inventory])
+          msg := "CrowdStrike's Namespace does not exist"
         }
 
         # Daemonset does not exist
