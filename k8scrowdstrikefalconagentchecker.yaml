@@ -18,12 +18,6 @@ spec:
           msg := "CrowdStrike's Namespace does not exist"
         }
 
-        # Namespace does not exist 
-        violation[{"msg": msg}] {
-          not data.inventory.namespace["falcon-system"]
-          msg := "CrowdStrike's Namespace does not exist 2"
-        }
-
         # Daemonset does not exist
         violation[{"msg": msg}] {
           not data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]
@@ -34,10 +28,4 @@ spec:
         violation[{"msg": msg}] {
           data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["desiredNumberScheduled"]
           msg := "CrowdStrike's Daemonset is not in a fully ready state"
-        }
-
-        violation[{"msg": msg}] {
-          data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"].status.numberReady !=
-          data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"].status.desiredNumberScheduled
-          msg := "CrowdStrike's Daemonset is not in a fully ready state2"
         }
