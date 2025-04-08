@@ -12,12 +12,10 @@ spec:
       rego: |
         package checkcrowdstrikeagent
 
-        nsdata := data.inventory.cluster["v1"]["Namespace"]
-        
         # Namespace does not exist 
         violation[{"msg": msg}] {
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          msg := sprintf("CrowdStrike's Namespace does not exist [%s]", [nsdata])
+          msg := "CrowdStrike's Namespace does not exist"
         }
 
         # Daemonset does not exist
@@ -28,6 +26,6 @@ spec:
 
         # Check Daemonset state
         violation[{"msg": msg}] {
-          data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["desiredNumberScheduled"]
+          data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["metadata"]["spec"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["metadata"]["spec"]["status"]["desiredNumberScheduled"]
           msg := "CrowdStrike's Daemonset is not in a fully ready state"
         }
