@@ -18,6 +18,12 @@ spec:
           msg := "CrowdStrike's Namespace does not exist"
         }
 
+        # Namespace does not exist 
+        violation[{"msg": msg}] {
+          not data.inventory.namespace["falcon-system"]
+          msg := "CrowdStrike's Namespace does not exist 2"
+        }
+
         # Daemonset does not exist
         violation[{"msg": msg}] {
           not data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]
