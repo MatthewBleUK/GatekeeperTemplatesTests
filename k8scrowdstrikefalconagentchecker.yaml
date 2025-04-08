@@ -12,12 +12,12 @@ spec:
       rego: |
         package checkcrowdstrikeagent
 
-        required_ns := input.parameters.requiredNamespace
+        data_obj_msg := data.inventory
         
         # Namespace does not exist 
         violation[{"msg": msg}] { 
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          msg := "CrowdStrike's Namespace does not exist - '%s", [required_ns])
+          msg := "CrowdStrike's Namespace does not exist - '%s", [data_obj_msg])
         }
 
         # Daemonset does not exist
