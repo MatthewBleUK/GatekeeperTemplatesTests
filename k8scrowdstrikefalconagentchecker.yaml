@@ -13,11 +13,7 @@ spec:
         package checkcrowdstrikeagent
 
         # Namespace does not exist 
-        violation[{"msg": msg}] {
-          input.review.kind.kind == "Namespace"
-          namespace := input.review.object.metadata.name
-          trace("Evaluating namespace: " + namespace)
-  
+        violation[{"msg": msg}] {  
           not data.inventory.cluster.v1.Namespace["falcon-system"]
           msg := "CrowdStrike's Namespace does not exist"
         }
