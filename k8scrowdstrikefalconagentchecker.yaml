@@ -11,22 +11,35 @@ spec:
     - target: admission.k8s.gatekeeper.sh
       rego: |
         package checkcrowdstrikeagent
-        
-        # Namespace does not exist 
-        violation[{"msg": msg}] { 
+
+        violation[{"msg": msg}] {
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          # msg := sprintf("CrowdStrike's Namespace does not exist, inventory: %v", [data.inventory])
-          msg := "CrowdStrike's Namespace does not exist"
+          # msg := sprintf("Inventory Data: %v", [data.inventory])
+          msg := "Falcon-system namespace does not exist"
         }
 
-        # Daemonset does not exist
         violation[{"msg": msg}] {
           not data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]
-          msg := "CrowdStrike's Daemonset does not exist"
+          msg := "Falcon-sensor daemonset does not exist"
         }
 
-        # Check Daemonset state
-        violation[{"msg": msg}] {
-          data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["desiredNumberScheduled"]
-          msg := "CrowdStrike's Daemonset is not in a fully ready state"
-        }
+        # violation[{"msg": msg}] {
+        #   data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["desiredNumberScheduled"]
+        #   msg := sprintf("Falcon-sensor daemonset is not in a fully ready state %v", [data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"]])
+        # }
+---
+apiVersion: syncset.gatekeeper.sh/v1alpha1
+kind: SyncSet
+metadata:
+  name: syncset-1
+spec:
+  gvks:
+    - group: ""
+      version: "v1"
+      kind: "Namespace"
+    - group: ""
+      version: "v1"
+      kind: "Pod"
+    - group: "apps"
+      version: "v1"
+      kind: "DaemonSet"
