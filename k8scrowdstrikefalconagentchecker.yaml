@@ -14,8 +14,8 @@ spec:
 
         violation[{"msg": msg}] {
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          # msg := sprintf("Inventory Data: %v", [data.inventory])
-          msg := "Falcon-system namespace does not exist"
+          msg := sprintf("Inventory Data: %v", [data.inventory])
+          # msg := "Falcon-system namespace does not exist"
         }
 
         violation[{"msg": msg}] {
