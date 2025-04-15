@@ -14,8 +14,8 @@ spec:
 
         violation[{"msg": msg}] {
           not data.inventory.cluster.v1.Namespace["falcon-system"]
-          msg := sprintf("Inventory Data: %v", [data.inventory])
-          # msg := "Falcon-system namespace does not exist"
+          # msg := sprintf("Inventory Data: %v", [data.inventory])
+          msg := "Falcon-system namespace does not exist"
         }
 
         violation[{"msg": msg}] {
@@ -27,19 +27,3 @@ spec:
         #   data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["desiredNumberScheduled"]
         #   msg := sprintf("Falcon-sensor daemonset is not in a fully ready state %v", [data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"]])
         # }
----
-apiVersion: syncset.gatekeeper.sh/v1alpha1
-kind: SyncSet
-metadata:
-  name: syncset-1
-spec:
-  gvks:
-    - group: ""
-      version: "v1"
-      kind: "Namespace"
-    - group: ""
-      version: "v1"
-      kind: "Pod"
-    - group: "apps"
-      version: "v1"
-      kind: "DaemonSet"
