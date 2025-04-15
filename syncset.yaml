@@ -1,36 +1,3 @@
-apiVersion: templates.gatekeeper.sh/v1
-kind: ConstraintTemplate
-metadata:
-  name: checkcrowdstrikeagent
-spec:
-  crd:
-    spec:
-      names:
-        kind: CheckCrowdStrikeAgent
-  targets:
-    - target: admission.k8s.gatekeeper.sh
-      rego: |
-        package checkcrowdstrikeagent
-
-        violation[{"msg": msg}] {
-          not data.inventory.cluster.v1.Namespace["falcon-system"]
-          # msg := sprintf("Inventory Data: %v", [data.inventory])
-
-          msg := "Falcon-system namespace does not exist"
-        }
-
-        violation[{"msg": msg}] {
-          not data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]
-          msg := "falcon-sensor Daemonset does not exist"
-        }
-
-        # # Check Daemonset state
-        # violation[{"msg": msg}] {
-        #   data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["numberReady"] != data.inventory.namespace["falcon-system"]["apps/v1"].DaemonSet["falcon-sensor"]["status"]["desiredNumberScheduled"]
-        #   msg := "falcon-sensor Daemonset is not in a fully ready state"
-        # }
-
----
 apiVersion: syncset.gatekeeper.sh/v1alpha1
 kind: SyncSet
 metadata:
